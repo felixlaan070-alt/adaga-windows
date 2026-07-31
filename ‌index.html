@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADAGA Windows @ Plant — Business OS</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+:root{
+  --navy:#0F1B33;--navy2:#16264a;--bg:#F3F5F8;--card:#FFFFFF;
+  --internet:#2F6FED;--internet-bg:#EAF1FF;
+  --water:#0E9E98;--water-bg:#E6F8F6;
+  --windows:#EE8A24;--windows-bg:#FFF1E1;
+  --text:#1C2438;--muted:#6B7280;
+  --danger:#DC2626;--danger-bg:#FEECEC;
+  --success:#16A34A;--success-bg:#EAF8EE;
+  --border:#E4E7EC;
+  --input-bg:#fbfbfc;--input-text:#1C2438;
+}
+body.theme-dark{
+  --bg:#0B1220;--card:#141B2D;
+  --internet-bg:#152238;--water-bg:#0F2521;--windows-bg:#2A1D0E;
+  --text:#E7EAF2;--muted:#93A0B8;
+  --danger-bg:#2A1416;--success-bg:#0F241A;
+  --border:#232E45;
+  --input-bg:#1B2338;--input-text:#E7EAF2;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Inter',ui-sans-serif,system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+h1,h2,h3,.brand{font-family:'Poppins',sans-serif;}
+.app{max-width:1150px;margin:0 auto;padding-bottom:60px;}
+header.topbar{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;padding:22px 24px 18px;border-radius:0 0 20px 20px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;}
+.brand{font-size:20px;font-weight:800;letter-spacing:0.3px;margin:0;}
+.brand span{color:#F5B87A;}
+.tagline{font-size:12px;color:#B9C4DE;margin-top:2px;}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.signout{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:7px 12px;font-size:12.5px;cursor:pointer;font-weight:600;}
+nav.tabs{display:flex;gap:6px;margin:16px 16px 0;overflow-x:auto;padding-bottom:4px;}
+nav.tabs button{flex:0 0 auto;background:var(--card);border:1px solid var(--border);color:var(--muted);font-weight:600;font-size:13px;padding:10px 15px;border-radius:10px;cursor:pointer;white-space:nowrap;}
+nav.tabs button.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+main{padding:20px 16px 40px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:16px;}
+.card h2{font-size:16px;margin:0 0 14px;}
+.card h3{font-size:13px;margin:0 0 10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+.stat-card{border-radius:14px;padding:16px 18px;color:#fff;}
+.stat-card .label{font-size:11.5px;opacity:.9;font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+.stat-card .value{font-size:25px;font-weight:800;font-family:'Poppins',sans-serif;margin-top:4px;}
+.stat-card .sub{font-size:12px;opacity:.85;margin-top:2px;}
+.stat-internet{background:linear-gradient(135deg,#2F6FED,#1E4FBB);}
+.stat-water{background:linear-gradient(135deg,#0E9E98,#0A7A75);}
+.stat-windows{background:linear-gradient(135deg,#EE8A24,#C96D0F);}
+.stat-cash{background:linear-gradient(135deg,#0F1B33,#2b3a5c);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);border-bottom:1px solid var(--border);padding:8px;}
+tbody td{padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.table-wrap{overflow-x:auto;}
+.badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;}
+.badge-paid{background:var(--success-bg);color:var(--success);}
+.badge-overdue{background:var(--danger-bg);color:var(--danger);}
+.badge-progress{background:var(--windows-bg);color:var(--windows);}
+.badge-quoted{background:var(--internet-bg);color:var(--internet);}
+.badge-completed{background:var(--success-bg);color:var(--success);}
+.btn{border:none;border-radius:8px;padding:8px 13px;font-size:12.5px;font-weight:600;cursor:pointer;}
+.btn:hover{opacity:.85;}
+.btn-primary{background:var(--navy);color:#fff;}
+.btn-internet{background:var(--internet);color:#fff;}
+.btn-water{background:var(--water);color:#fff;}
+.btn-windows{background:var(--windows);color:#fff;}
+.btn-ghost{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+.btn-danger{background:var(--danger-bg);color:var(--danger);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+form.inline-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:6px;}
+form.inline-form input,form.inline-form select{padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;width:100%;background:var(--input-bg);color:var(--input-text);}
+.form-actions{grid-column:1/-1;display:flex;justify-content:flex-end;}
+.empty{text-align:center;padding:26px 10px;color:var(--muted);font-size:13px;}
+.empty b{display:block;font-size:14px;color:var(--text);margin-bottom:4px;}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.calc-hint{font-size:12px;color:var(--muted);background:var(--bg);border-radius:8px;padding:8px 12px;margin:4px 0 12px;}
+.activity-item{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.amt-income{color:var(--success);font-weight:700;}
+.amt-expense{color:var(--danger);font-weight:700;}
+.pill-select{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.pill-select button{border:1px solid var(--border);background:#fff;border-radius:100px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);}
+.pill-select button.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-card{background:var(--card);border-radius:16px;padding:32px 28px;max-width:360px;width:100%;box-shadow:0 10px 40px rgba(15,27,51,.12);}
+.login-card h1{font-size:19px;margin:0 0 4px;}
+.login-card p{font-size:12.5px;color:var(--muted);margin:0 0 20px;}
+.login-card input{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:13.5px;background:var(--input-bg);color:var(--input-text);}
+.login-card button{width:100%;padding:11px;border-radius:8px;background:var(--navy);color:#fff;border:none;font-weight:700;cursor:pointer;font-size:13.5px;}
+.login-error{color:var(--danger);font-size:12.5px;margin-bottom:10px;display:none;}
+.bar-row{margin-bottom:12px;}
+.bar-row .lbl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;}
+.bar-track{height:10px;background:var(--bg);border-radius:6px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--windows);}
+.profit-pos{color:var(--success);font-weight:700;}
+.profit-neg{color:var(--danger);font-weight:700;}
+.mini-stat{background:var(--bg);border-radius:10px;padding:10px 12px;}
+.mini-stat .lbl{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px;}
+.mini-stat .val{font-size:16px;font-weight:800;margin-top:2px;}
+.mini-stat.total{background:var(--success-bg);}
+.mini-stat.total .val{color:var(--success);}
+.mini-stat.neg .val{color:var(--danger);}
+.li-input{width:72px;padding:5px 6px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;background:var(--input-bg);color:var(--input-text);}
+.hidden{display:none !important;}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,27,51,.55);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal-box{background:var(--card);border-radius:14px;padding:22px;max-width:440px;width:100%;}
+.modal-box h3{font-size:15px;margin:0 0 8px;}
+.modal-box textarea{width:100%;min-height:200px;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;font-family:'Inter',sans-serif;resize:vertical;background:var(--input-bg);color:var(--input-text);}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;}
+.phone-hint{background:var(--bg);border-radius:8px;padding:8px 10px;font-size:12.5px;margin-bottom:10px;}
+@media (max-width:600px){.card{padding:14px;}header.topbar{padding:18px 16px 14px;}}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div class="login-wrap" id="loginScreen">
+  <div class="login-card">
+    <h1>ADAGA Windows @ Plant</h1>
+    <p>Sign in to your business dashboard.</p>
+    <div class="login-error" id="loginError"></div>
+    <input id="loginEmail" type="email" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button onclick="doLogin()">Sign in</button>
+  </div>
+</div>
+
+<!-- ============ INVOICE MODAL ============ -->
+<div class="modal-overlay hidden" id="invoiceModal">
+  <div class="modal-box">
+    <h3>Invoice / Receipt</h3>
+    <div class="phone-hint" id="invoicePhoneHint">Paste this to: —</div>
+    <textarea id="invoiceText" readonly></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeInvoiceModal()">Close</button>
+      <button class="btn btn-primary btn-sm" onclick="copyInvoiceText()">Copy text</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TERMS MODAL ============ -->
+<div class="modal-overlay hidden" id="termsModal">
+  <div class="modal-box">
+    <h3 id="termsModalTitle">Terms & Conditions</h3>
+    <textarea id="termsText"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeTermsModal()">Close</button>
+      <button class="btn btn-primary btn-sm hidden" id="saveTermsBtn" onclick="saveTerms()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAYMENT MODAL (amount + currency received) ============ -->
+<div class="modal-overlay hidden" id="paymentModal">
+  <div class="modal-box">
+    <h3 id="paymentModalTitle">Log payment</h3>
+    <form id="paymentModalForm" class="inline-form" style="margin-bottom:0;">
+      <input required type="number" step="0.01" id="paymentAmountInput" placeholder="Amount received">
+      <select id="paymentCurrencyInput">
+        <option value="HTG">HTG</option>
+        <option value="USD">USD</option>
+        <option value="DOP">RD$ (DOP)</option>
+      </select>
+      <div class="form-actions" style="grid-column:1/-1;">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="closePaymentModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm">Confirm</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ CONFIRM MODAL (replaces confirm()) ============ -->
+<div class="modal-overlay hidden" id="confirmModal">
+  <div class="modal-box" style="max-width:360px;">
+    <h3 id="confirmModalTitle">Are you sure?</h3>
+    <p id="confirmModalMessage" style="font-size:13px;color:var(--muted);margin:0 0 4px;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeConfirmModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="confirmModalActionBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FIELD MODAL (replaces prompt() for edits) ============ -->
+<div class="modal-overlay hidden" id="fieldModal">
+  <div class="modal-box">
+    <h3 id="fieldModalTitle">Edit</h3>
+    <form id="fieldModalForm" class="inline-form" style="margin-bottom:0;">
+      <div id="fieldModalFields" style="display:contents;"></div>
+      <div class="form-actions" style="grid-column:1/-1;">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="closeFieldModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ TOAST (replaces alert()) ============ -->
+<div id="toastContainer" style="position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;max-width:320px;"></div>
+
+<!-- ============ MAIN APP ============ -->
+<div class="app hidden" id="appRoot">
+  <header class="topbar">
+    <div>
+      <p class="brand">ADAGA <span>WINDOWS @ PLANT</span></p>
+      <p class="tagline" id="roleTag">Business OS</p>
+    </div>
+    <div class="header-actions">
+      <select class="signout" id="langSwitcher" style="cursor:pointer;">
+        <option value="en">EN — English</option>
+        <option value="ht">HT — Kreyòl</option>
+        <option value="fr">FR — Français</option>
+      </select>
+      <select class="signout" id="themeSwitcher" style="cursor:pointer;">
+        <option value="light">☀️ Light</option>
+        <option value="dark">🌙 Dark</option>
+      </select>
+      <button class="signout" id="termsBtn" onclick="openMyTerms()">Terms & Conditions</button>
+      <button class="signout" onclick="doLogout()" id="signOutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <!-- ===== FATHER VIEW (Windows division only) ===== -->
+  <main id="fatherView" class="hidden" style="padding:20px 16px;">
+    <div class="grid" style="margin-bottom:16px;">
+      <div class="stat-card stat-windows"><div class="label">This Month Income</div><div class="value" id="f-income">$0</div></div>
+      <div class="stat-card stat-cash"><div class="label">This Month Net</div><div class="value" id="f-net">$0</div><div class="sub" id="f-net-sub">income − expenses</div></div>
+    </div>
+    <div class="card"><h2>📈 Windows division — monthly trend</h2><div id="f-trend"></div></div>
+  </main>
+
+  <!-- ===== SHARED APP SHELL (Owner + Office Manager) ===== -->
+  <div id="workAppView" class="hidden">
+    <nav class="tabs" id="tabs">
+      <button data-tab="dashboard" class="active">Dashboard</button>
+      <button data-tab="internet" class="father-hide">Internet</button>
+      <button data-tab="water" class="father-hide">Water</button>
+      <button data-tab="windows">Windows</button>
+      <button data-tab="cash">Cash & Reports</button>
+      <button data-tab="materials">Materials</button>
+      <button data-tab="users" class="owner-only">Users</button>
+    </nav>
+    <main>
+      <!-- DASHBOARD -->
+      <section class="tab-panel active" id="panel-dashboard">
+        <div class="grid" style="margin-bottom:16px;">
+          <div class="stat-card stat-internet father-hide"><div class="label">Internet</div><div class="value" id="stat-internet-count">0</div><div class="sub" id="stat-internet-sub">customers</div></div>
+          <div class="stat-card stat-water father-hide"><div class="label">Water</div><div class="value" id="stat-water-count">0</div><div class="sub">customers</div></div>
+          <div class="stat-card stat-windows"><div class="label">Windows</div><div class="value" id="stat-windows-count">0</div><div class="sub" id="stat-windows-sub">jobs open</div></div>
+          <div class="stat-card stat-cash"><div class="label" id="stat-net-label">This Month Net</div><div class="value" id="stat-net">$0</div><div class="sub" id="stat-net-sub">income − expenses</div></div>
+        </div>
+        <div class="card"><h2 id="income-breakdown-title">💰 Income this month by division</h2><div id="income-breakdown"></div></div>
+        <div class="card"><h2 id="recent-activity-title">🕓 Recent activity</h2><div id="recent-activity"></div></div>
+      </section>
+
+      <!-- INTERNET -->
+      <section class="tab-panel" id="panel-internet">
+        <div class="card"><h2 id="hdrAddInternet">📶 Add internet customer</h2>
+          <form class="inline-form" id="form-internet">
+            <input required name="name" placeholder="Customer name">
+            <input name="phone" placeholder="Phone">
+            <input name="address" placeholder="Address">
+            <input required name="fee" type="number" step="0.01" placeholder="Monthly fee">
+            <select name="feeCurrency">
+              <option value="HTG">HTG</option>
+              <option value="USD">USD</option>
+              <option value="DOP">RD$ (DOP)</option>
+            </select>
+            <input name="installDate" type="date">
+            <div class="form-actions"><button class="btn btn-internet" type="submit" id="btnAddInternet">Add customer</button></div>
+          </form>
+        </div>
+        <div class="card"><h2 id="hdrListInternet">Customer list</h2><div class="table-wrap"><table id="table-internet"></table></div></div>
+      </section>
+
+      <!-- WATER -->
+      <section class="tab-panel" id="panel-water">
+        <div class="card"><h2 id="hdrAddWater">💧 Add water customer</h2>
+          <form class="inline-form" id="form-water">
+            <input required name="name" placeholder="Customer name">
+            <input name="phone" placeholder="Phone">
+            <select name="plan" id="waterPlanSelect">
+              <option value="weekly">Weekly — unlimited, HTG 75</option>
+              <option value="bucket5">5-Bucket Pack — HTG 25</option>
+              <option value="bucket10">10-Bucket Pack — HTG 50</option>
+            </select>
+            <div class="form-actions"><button class="btn btn-water" type="submit" id="btnAddWater">Add customer</button></div>
+          </form>
+        </div>
+        <div class="card"><h2 id="hdrListWater">Customer list</h2><div class="table-wrap"><table id="table-water"></table></div></div>
+      </section>
+
+      <!-- WINDOWS -->
+      <section class="tab-panel" id="panel-windows">
+        <div class="card office-manager-hide" id="rateCard">
+          <h2>💲 Rate card (per item type)</h2>
+          <div class="calc-hint">Set a rate for each type of item. "Per sqft" prices by area; "Flat" charges the rate once per quantity, ignoring size. Changing a rate here won't affect jobs already saved.</div>
+          <div class="table-wrap"><table id="table-rate-card"></table></div>
+          <div class="form-actions" style="margin-top:10px;"><button class="btn btn-primary btn-sm" onclick="addRateCardEntry()">+ Add item type</button></div>
+        </div>
+        <div class="card office-manager-hide" id="addJobCard">
+          <h2 id="hdrAddWindowJob">🪟 Add window job</h2>
+          <form class="inline-form" id="form-windows">
+            <input required name="customer" placeholder="Customer name">
+            <input name="phone" placeholder="Customer phone">
+            <input name="address" placeholder="Customer address">
+            <select name="glassType">
+              <option value="">Glass type (optional)</option>
+              <option value="Bronze">Bronze</option>
+              <option value="Silver">Silver</option>
+              <option value="Blue">Blue</option>
+              <option value="Green">Green</option>
+              <option value="Mirror">Mirror</option>
+              <option value="Clear">Clear</option>
+              <option value="Black">Black</option>
+            </select>
+            <select name="aluminumColor">
+              <option value="">Aluminum color (optional)</option>
+              <option value="Bronze">Bronze</option>
+              <option value="White">White</option>
+            </select>
+            <input name="description" placeholder="Job description">
+            <select name="currency" id="jobCurrencySelect">
+              <option value="HTG">HTG</option>
+              <option value="USD">USD</option>
+              <option value="DOP">RD$ (DOP)</option>
+            </select>
+            <input name="dueDate" type="date" title="Installation date">
+
+            <div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;margin:10px 0 8px;">
+              <h3 style="margin:0;">Windows & Measurements</h3>
+              <button type="button" class="btn btn-windows btn-sm" onclick="addLineItemRow()">+ Add another window</button>
+            </div>
+            <div class="table-wrap" style="grid-column:1/-1;"><table id="lineItemsTable"></table></div>
+
+            <input name="finalPrice" type="number" step="0.01" placeholder="Final agreed price" id="finalPriceInput">
+            <input name="materialCost" type="number" step="0.01" placeholder="Material cost">
+            <input name="transportCost" type="number" step="0.01" placeholder="Transport cost">
+            <input name="fabricationCost" type="number" step="0.01" placeholder="Fabrication cost">
+            <input name="installationCost" type="number" step="0.01" placeholder="Installation labor cost">
+            <input name="otherCost" type="number" step="0.01" placeholder="Other cost">
+            <div class="form-actions"><button type="button" class="btn btn-ghost hidden" id="btnCancelEditJob" onclick="cancelEditJob()">Cancel edit</button><button class="btn btn-windows" type="submit" id="btnAddJob">Add job</button></div>
+          </form>
+          <div class="calc-hint" id="suggestedPriceHint">Suggested price will show here based on total window area × rate.</div>
+        </div>
+        <div class="card office-manager-hide">
+          <h2>📐 Pricing summary (this job)</h2>
+          <div class="grid" id="pricingSummaryGrid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));"></div>
+        </div>
+        <div class="card office-manager-hide">
+          <h2>💵 Job profit summary (this job)</h2>
+          <div class="grid" style="grid-template-columns:repeat(3,1fr);" id="profitSummaryGrid"></div>
+        </div>
+
+        <div class="card hidden" id="cashierAddJobCard">
+          <h2>🪟 Enter window job details</h2>
+          <div class="calc-hint">Enter the customer's details and measurements. Pricing is handled by the owner or father — you won't see a total here.</div>
+          <form class="inline-form" id="form-cashier-windows">
+            <input required name="customer" placeholder="Customer name">
+            <input name="phone" placeholder="Customer phone">
+            <input name="address" placeholder="Customer address">
+            <select name="glassType">
+              <option value="">Glass type (optional)</option>
+              <option value="Bronze">Bronze</option>
+              <option value="Silver">Silver</option>
+              <option value="Blue">Blue</option>
+              <option value="Green">Green</option>
+              <option value="Mirror">Mirror</option>
+              <option value="Clear">Clear</option>
+              <option value="Black">Black</option>
+            </select>
+            <select name="aluminumColor">
+              <option value="">Aluminum color (optional)</option>
+              <option value="Bronze">Bronze</option>
+              <option value="White">White</option>
+            </select>
+            <input name="description" placeholder="Job description">
+            <select name="currency">
+              <option value="HTG">HTG</option>
+              <option value="USD">USD</option>
+              <option value="DOP">RD$ (DOP)</option>
+            </select>
+            <input name="dueDate" type="date" title="Installation date">
+
+            <div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;margin:10px 0 8px;">
+              <h3 style="margin:0;">Windows & Measurements</h3>
+              <button type="button" class="btn btn-windows btn-sm" onclick="addLineItemRow()">+ Add another window</button>
+            </div>
+            <div class="table-wrap" style="grid-column:1/-1;"><table id="cashierLineItemsTable"></table></div>
+
+            <div class="form-actions"><button class="btn btn-windows" type="submit">Submit job details</button></div>
+          </form>
+        </div>
+
+        <div class="card"><h2 id="hdrJobList">Job list</h2><div class="table-wrap"><table id="table-windows"></table></div></div>
+      </section>
+
+
+      <!-- CASH -->
+      <section class="tab-panel" id="panel-cash">
+        <div class="card" id="expenseCard">
+          <h2 id="hdrLogExpense">➕ Log an expense</h2>
+          <form class="inline-form" id="form-expense">
+            <select name="division"><option value="internet">Internet</option><option value="water">Water</option><option value="windows">Windows</option><option value="general">General</option></select>
+            <select name="expenseType">
+              <option value="general">General</option>
+              <option value="materials">Materials</option>
+              <option value="employee_salary">Employee Salary</option>
+              <option value="daily_labor">Daily Labor (Fabrication/Install)</option>
+              <option value="owner_withdrawal">Owner Withdrawal / Directed Payment</option>
+            </select>
+            <input required name="amount" type="number" step="0.01" placeholder="Amount">
+            <select name="currency"><option value="HTG">HTG</option><option value="USD">USD</option><option value="DOP">RD$ (DOP)</option></select>
+            <input name="note" placeholder="What for?">
+            <div class="form-actions"><button class="btn btn-primary" type="submit">Log expense</button></div>
+          </form>
+        </div>
+        <div class="card owner-only" id="flagsCard">
+          <h2>🚩 Flagged for review</h2>
+          <div id="flags-list"></div>
+        </div>
+        <div class="card">
+          <h2 id="cashCardTitle">📒 All transactions</h2>
+          <div class="pill-select" id="cash-filter">
+            <button data-f="all" class="active">All</button>
+            <button data-f="internet">Internet</button>
+            <button data-f="water">Water</button>
+            <button data-f="windows">Windows</button>
+            <button data-f="general">General</button>
+          </div>
+          <div class="table-wrap"><table id="table-cash"></table></div>
+        </div>
+      </section>
+
+      <!-- MATERIALS -->
+      <section class="tab-panel" id="panel-materials">
+        <div class="card office-manager-hide">
+          <h2>📦 Materials catalog</h2>
+          <div class="calc-hint">Prices here are visible to everyone selling — unlike the Windows rate card, there's nothing to hide about a price list customers can just ask about.</div>
+          <div class="table-wrap"><table id="table-materials-catalog"></table></div>
+          <div class="form-actions" style="margin-top:10px;"><button class="btn btn-primary btn-sm" onclick="addMaterialCatalogEntry()">+ Add item</button></div>
+        </div>
+        <div class="card">
+          <h2>🧾 Sell an item</h2>
+          <form class="inline-form" id="form-sell-material">
+            <select name="itemId" id="sellMaterialSelect"></select>
+            <input name="qty" type="number" step="1" min="1" value="1" placeholder="Quantity">
+            <div class="form-actions"><button class="btn btn-windows" type="submit">Sell & log payment</button></div>
+          </form>
+          <div class="calc-hint" id="materialSaleHint">Pick an item to see the total.</div>
+        </div>
+        <div class="card">
+          <h2>🕓 Recent material sales</h2>
+          <div id="recent-material-sales"></div>
+        </div>
+      </section>
+
+      <!-- USERS (owner only) -->
+      <section class="tab-panel" id="panel-users">
+        <div class="card">
+          <h2>👤 Add Office Manager</h2>
+          <form class="inline-form" id="form-adduser">
+            <input required name="fullName" placeholder="Full name">
+            <input required name="email" type="email" placeholder="Email">
+            <input required name="password" type="password" placeholder="Temporary password">
+            <select name="language">
+              <option value="en">English</option>
+              <option value="ht">Haitian Creole</option>
+              <option value="fr">French</option>
+            </select>
+            <select name="currency">
+              <option value="USD">USD</option>
+              <option value="HTG">HTG</option>
+              <option value="DOP">RD$ (DOP)</option>
+            </select>
+            <div class="form-actions"><button class="btn btn-primary" type="submit">Create account</button></div>
+          </form>
+          <div class="calc-hint">This creates a real login right now. If your Supabase project requires email confirmation (Authentication → Providers → Email), they'll need to confirm before their first sign-in — or you can confirm them manually from Authentication → Users.</div>
+        </div>
+        <div class="card">
+          <h2>All users</h2>
+          <div class="table-wrap"><table id="table-users"></table></div>
+        </div>
+        <div class="card">
+          <h2>💱 Exchange rates (display only)</h2>
+          <div class="calc-hint">These only change how numbers are <b>shown</b> to each person based on their currency preference — they never change what's actually recorded. Rates move, so check back occasionally.</div>
+          <form class="inline-form" id="form-rates">
+            <input required name="htgRate" type="number" step="0.01" id="htgRateInput" placeholder="HTG per 1 USD">
+            <input required name="dopRate" type="number" step="0.01" id="dopRateInput" placeholder="RD$ per 1 USD">
+            <div class="form-actions"><button class="btn btn-primary" type="submit">Save rates</button></div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+// ===================== CONFIG =====================
+const SUPABASE_URL = 'https://mtgppcxzfnxsbzwoartr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_N5aCJF9p8yovB82TlPq61w_U-3nb-Dd';
+// ===================================================
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let myRole = null;
+let myUserId = null;
+let myFullName = '';
+let paymentModalContext = null;
+let myLang = 'en';
+let myCurrency = 'USD';
+let rateHtg = 130.7;
+let rateDop = 60;
+let rateRerSqft = 75;
+let cashFilter = 'all';
+let state = { internet: [], water: [], windows: [], cashLog: [], flags: [] };
+let usersCache = [];
+let termsEditableRole = null;
+let currentLineItems = [{ width:'', height:'', qty:1, productType:'Window' }];
+let editingJobId = null;
+let rateCardMap = {};
+let rateCardList = [];
+let cashierProductTypes = [];
+let materialsCatalog = [];
+
+const CURRENCY_SYMBOLS = { USD:'$', DOP:'RD$', HTG:'HTG ' };
+
+const TRANSLATIONS = {
+  en: { dashboard:'Dashboard', internet:'Internet', water:'Water', windows:'Windows', cash:'Cash & Reports', users:'Users',
+    signOut:'Sign out', terms:'Terms & Conditions',
+    addInternetCustomer:'📶 Add internet customer', customerList:'Customer list',
+    addWaterCustomer:'💧 Add water customer', addWindowJob:'🪟 Add window job', pricingSetting:'⚙️ Pricing setting',
+    logExpense:'➕ Log an expense', allTransactions:'📒 All transactions', weeklyTransactions:'📒 Transactions (last 7 days)',
+    thisMonthNet:'This Month Net', thisWeekNet:'This Week Net',
+    incomeByDivision:'💰 Income this month by division', incomeByDivisionWeek:'💰 Income this week by division',
+    recentActivity:'🕓 Recent activity', addCustomer:'Add customer', addJob:'Add job', jobList:'Job list',
+    markPaid:'Mark paid + invoice', logPayment:'Log payment', buyNewPack:'Buy new pack', logPickup:'Log pickup',
+    remove:'Remove', paymentInvoice:'Payment + invoice', editCosts:'Edit price & costs',
+    roleTagCashier:'Cashier — Internet, Water, Windows payments', roleTagFather:'Founder — Windows Enterprise',
+    enteredBy:'Entered by' },
+  ht: { dashboard:'Tablo', internet:'Entènèt', water:'Dlo', windows:'Fenèt', cash:'Kach & Rapò', users:'Itilizatè',
+    signOut:'Dekonekte', terms:'Kondisyon & Règleman',
+    addInternetCustomer:'📶 Ajoute kliyan entènèt', customerList:'Lis kliyan',
+    addWaterCustomer:'💧 Ajoute kliyan dlo', addWindowJob:'🪟 Ajoute travay fenèt', pricingSetting:'⚙️ Reglaj pri',
+    logExpense:'➕ Antre yon depans', allTransactions:'📒 Tout tranzaksyon', weeklyTransactions:'📒 Tranzaksyon (7 dènye jou)',
+    thisMonthNet:'Nèt Mwa Sa a', thisWeekNet:'Nèt Semèn Sa a',
+    incomeByDivision:'💰 Revni mwa sa a pa divizyon', incomeByDivisionWeek:'💰 Revni semèn sa a pa divizyon',
+    recentActivity:'🕓 Aktivite resan', addCustomer:'Ajoute kliyan', addJob:'Ajoute travay', jobList:'Lis travay',
+    markPaid:'Make peye + resi', logPayment:'Antre peman', buyNewPack:'Achte nouvo pak', logPickup:'Antre pran dlo',
+    remove:'Retire', paymentInvoice:'Peman + resi', editCosts:'Modifye pri & kout',
+    roleTagCashier:'Kesye — Peman Entènèt, Dlo, Fenèt', roleTagFather:'Fondatè — Antrepriz Fenèt',
+    enteredBy:'Antre pa' },
+  fr: { dashboard:'Tableau de bord', internet:'Internet', water:'Eau', windows:'Fenêtres', cash:'Caisse & Rapports', users:'Utilisateurs',
+    signOut:'Déconnexion', terms:'Conditions générales',
+    addInternetCustomer:'📶 Ajouter client internet', customerList:'Liste des clients',
+    addWaterCustomer:'💧 Ajouter client eau', addWindowJob:'🪟 Ajouter un travail de fenêtre', pricingSetting:'⚙️ Paramètre de tarif',
+    logExpense:'➕ Enregistrer une dépense', allTransactions:'📒 Toutes les transactions', weeklyTransactions:'📒 Transactions (7 derniers jours)',
+    thisMonthNet:'Net Ce Mois', thisWeekNet:'Net Cette Semaine',
+    incomeByDivision:'💰 Revenus ce mois par division', incomeByDivisionWeek:'💰 Revenus cette semaine par division',
+    recentActivity:'🕓 Activité récente', addCustomer:'Ajouter client', addJob:'Ajouter le travail', jobList:'Liste des travaux',
+    markPaid:'Marquer payé + facture', logPayment:'Enregistrer paiement', buyNewPack:'Acheter un pack', logPickup:'Enregistrer le retrait',
+    remove:'Supprimer', paymentInvoice:'Paiement + facture', editCosts:'Modifier le prix & les coûts',
+    roleTagCashier:'Caissière — Paiements Internet, Eau, Fenêtres', roleTagFather:'Fondateur — Entreprise Fenêtres',
+    enteredBy:'Saisi par' }
+};
+function t(key){ return (TRANSLATIONS[myLang] && TRANSLATIONS[myLang][key]) || TRANSLATIONS.en[key] || key; }
+
+function fmt(n){ return Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2}); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function thisMonthKey(){ return new Date().toISOString().slice(0,7); }
+function daysSince(dateStr){ if(!dateStr) return Infinity; return (Date.now()-new Date(dateStr).getTime())/(1000*60*60*24); }
+function isOwner(){ return myRole === 'owner'; }
+function isOfficeManager(){ return myRole === 'office_manager'; }
+function isFather(){ return myRole === 'father'; }
+function canManageWindows(){ return isOwner() || isFather(); }
+function canDeleteWindowJobs(){ return isOwner(); }
+function canDeleteCash(){ return isOwner(); }
+function applyTheme(theme){ document.body.classList.toggle('theme-dark', theme === 'dark'); }
+
+// ---------- CURRENCY ----------
+function divisionCurrency(div){ return div === 'water' ? 'HTG' : 'USD'; }
+function toUSD(amount, sourceCurrency){
+  amount = Number(amount)||0;
+  if(sourceCurrency==='USD') return amount;
+  if(sourceCurrency==='HTG') return amount / rateHtg;
+  if(sourceCurrency==='DOP') return amount / rateDop;
+  return amount;
+}
+function fromUSD(usdAmount){
+  if(myCurrency==='USD') return usdAmount;
+  if(myCurrency==='HTG') return usdAmount * rateHtg;
+  if(myCurrency==='DOP') return usdAmount * rateDop;
+  return usdAmount;
+}
+function fmtMoney(usdAmount){ return CURRENCY_SYMBOLS[myCurrency] + fmt(fromUSD(usdAmount)); }
+function disp(amount, nativeCurrency){ return fmtMoney(toUSD(amount, nativeCurrency)); }
+function convertUSDTo(usdAmount, targetCurrency){
+  if(targetCurrency==='USD') return usdAmount;
+  if(targetCurrency==='HTG') return usdAmount * rateHtg;
+  if(targetCurrency==='DOP') return usdAmount * rateDop;
+  return usdAmount;
+}
+
+// ---------- APPLY TRANSLATIONS ----------
+function applyTranslations(){
+  const set = (id, key) => { const el = document.getElementById(id); if(el) el.textContent = t(key); };
+  const setTab = (sel, key) => { const el = document.querySelector(sel); if(el) el.textContent = t(key); };
+  setTab('[data-tab="dashboard"]','dashboard');
+  setTab('[data-tab="internet"]','internet');
+  setTab('[data-tab="water"]','water');
+  setTab('[data-tab="windows"]','windows');
+  setTab('[data-tab="cash"]','cash');
+  setTab('[data-tab="users"]','users');
+  set('signOutBtn','signOut');
+  set('termsBtn','terms');
+  set('hdrAddInternet','addInternetCustomer');
+  set('hdrListInternet','customerList');
+  set('hdrAddWater','addWaterCustomer');
+  set('hdrListWater','customerList');
+  set('hdrAddWindowJob','addWindowJob');
+  set('hdrPricing','pricingSetting');
+  set('hdrJobList','jobList');
+  set('hdrLogExpense','logExpense');
+  set('btnAddInternet','addCustomer');
+  set('btnAddWater','addCustomer');
+  set('btnAddJob','addJob');
+  set('recent-activity-title','recentActivity');
+  document.getElementById('stat-net-label').textContent = isOfficeManager() ? t('thisWeekNet') : t('thisMonthNet');
+  document.getElementById('income-breakdown-title').textContent = isOfficeManager() ? t('incomeByDivisionWeek') : t('incomeByDivision');
+  document.getElementById('cashCardTitle').textContent = isOfficeManager() ? t('weeklyTransactions') : t('allTransactions');
+  if(isOfficeManager()) document.getElementById('roleTag').textContent = t('roleTagCashier');
+  else if(isFather()) document.getElementById('roleTag').textContent = t('roleTagFather');
+}
+
+// ---------- INVOICE MODAL ----------
+function showInvoiceModal(text, phone){
+  document.getElementById('invoiceText').value = text;
+  document.getElementById('invoicePhoneHint').textContent = 'Paste this to: ' + (phone || '(no phone on file)');
+  document.getElementById('invoiceModal').classList.remove('hidden');
+}
+function closeInvoiceModal(){ document.getElementById('invoiceModal').classList.add('hidden'); }
+function copyInvoiceText(){
+  const ta = document.getElementById('invoiceText');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(()=>{ showToast('Copied! Paste it into WhatsApp now.'); }).catch(()=>{ document.execCommand('copy'); });
+}
+
+// ---------- PAYMENT MODAL ----------
+function openPaymentModal(title, defaultAmount, defaultCurrency, context){
+  document.getElementById('paymentModalTitle').textContent = title;
+  document.getElementById('paymentAmountInput').value = (defaultAmount === null || defaultAmount === undefined) ? '' : defaultAmount;
+  document.getElementById('paymentCurrencyInput').value = defaultCurrency || 'USD';
+  paymentModalContext = context;
+  document.getElementById('paymentModal').classList.remove('hidden');
+}
+function closePaymentModal(){ document.getElementById('paymentModal').classList.add('hidden'); paymentModalContext = null; }
+
+// ---------- TOAST ----------
+function showToast(msg, type){
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText = `background:${type==='error'?'#DC2626':'#0F1B33'};color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;transition:opacity .25s ease;`;
+  document.getElementById('toastContainer').appendChild(el);
+  requestAnimationFrame(()=>{ el.style.opacity='1'; });
+  setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(), 300); }, 3400);
+}
+
+// ---------- CONFIRM MODAL ----------
+function askConfirm(message, onConfirm){
+  document.getElementById('confirmModalMessage').textContent = message;
+  const oldBtn = document.getElementById('confirmModalActionBtn');
+  const newBtn = oldBtn.cloneNode(true);
+  oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+  newBtn.addEventListener('click', async ()=>{ closeConfirmModal(); await onConfirm(); });
+  document.getElementById('confirmModal').classList.remove('hidden');
+}
+function closeConfirmModal(){ document.getElementById('confirmModal').classList.add('hidden'); }
+
+// ---------- FIELD MODAL ----------
+let fieldModalContext = null;
+function openFieldModal(title, fields, context){
+  document.getElementById('fieldModalTitle').textContent = title;
+  document.getElementById('fieldModalFields').innerHTML = fields.map(f=>{
+    if(f.type==='select'){
+      return `<select name="${f.name}">${f.options.map(o=>`<option value="${o.value}" ${o.value===f.value?'selected':''}>${o.label}</option>`).join('')}</select>`;
+    }
+    if(f.type==='textarea'){
+      return `<textarea name="${f.name}" placeholder="${f.label}" style="grid-column:1/-1;min-height:90px;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;background:var(--input-bg);color:var(--input-text);">${f.value!=null?f.value:''}</textarea>`;
+    }
+    return `<input name="${f.name}" type="${f.type||'text'}" ${f.type==='number' ? 'step="0.01"' : ''} placeholder="${f.label}" value="${f.value!=null?f.value:''}">`;
+  }).join('');
+  fieldModalContext = context;
+  document.getElementById('fieldModal').classList.remove('hidden');
+}
+function closeFieldModal(){ document.getElementById('fieldModal').classList.add('hidden'); fieldModalContext = null; }
+document.getElementById('fieldModalForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const values = {};
+  for(const [k,v] of formData.entries()) values[k]=v;
+  const ctx = fieldModalContext;
+  closeFieldModal();
+  if(!ctx) return;
+  if(ctx.type==='userPrefs') await doEditUserPrefs(ctx.id, values);
+  else if(ctx.type==='windowCosts') await doEditWindowCosts(ctx.id, values);
+  else if(ctx.type==='waterPickup') await doLogWaterPickup(ctx.id, values);
+  else if(ctx.type==='flagCash') await doFlagCash(ctx.id, values);
+  else if(ctx.type==='rateCard') await doSaveRateCard(ctx.id, values);
+  else if(ctx.type==='materialCatalog') await doSaveMaterialCatalog(ctx.id, values);
+});
+
+function flagCashEntry(id){
+  openFieldModal('Flag this transaction for the owner', [
+    { name:'note', label:'What needs to change or be deleted, and why?', type:'textarea', value:'' }
+  ], { type:'flagCash', id });
+}
+async function doFlagCash(id, values){
+  if(!values.note || !values.note.trim()){ showToast('Write a note first.', 'error'); return; }
+  const { error } = await sb.from('adaga_flags').insert({ cash_log_id: id, note: values.note.trim(), created_by: myUserId });
+  if(error){ showToast(error.message, 'error'); return; }
+  showToast('Flagged — the owner will review it.');
+  await refreshAll();
+}
+async function resolveFlag(id){
+  await sb.from('adaga_flags').update({ status:'resolved' }).eq('id', id);
+  showToast('Marked resolved.');
+  await refreshAll();
+}
+
+// ---------- TERMS MODAL ----------
+async function openMyTerms(){
+  const { data } = await sb.from('adaga_terms').select('content').eq('role', myRole).maybeSingle();
+  document.getElementById('termsModalTitle').textContent = t('terms');
+  document.getElementById('termsText').value = data ? data.content : 'No terms have been set for your role yet — ask the owner.';
+  document.getElementById('termsText').readOnly = true;
+  document.getElementById('saveTermsBtn').classList.add('hidden');
+  termsEditableRole = null;
+  document.getElementById('termsModal').classList.remove('hidden');
+}
+async function openTermsFor(role){
+  const { data } = await sb.from('adaga_terms').select('content').eq('role', role).maybeSingle();
+  document.getElementById('termsModalTitle').textContent = 'Terms & Conditions — ' + role.replace('_',' ');
+  document.getElementById('termsText').value = data ? data.content : '(no terms set yet — write one below and save)';
+  document.getElementById('termsText').readOnly = false;
+  document.getElementById('saveTermsBtn').classList.remove('hidden');
+  termsEditableRole = role;
+  document.getElementById('termsModal').classList.remove('hidden');
+}
+async function saveTerms(){
+  if(!termsEditableRole) return;
+  const content = document.getElementById('termsText').value;
+  await sb.from('adaga_terms').upsert({ role: termsEditableRole, content, updated_at: new Date().toISOString() });
+  showToast('Saved.');
+  closeTermsModal();
+}
+function closeTermsModal(){ document.getElementById('termsModal').classList.add('hidden'); }
+
+// ---------- AUTH ----------
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+  errBox.style.display = 'none';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if(error){ errBox.textContent = error.message; errBox.style.display = 'block'; return; }
+  await afterLogin();
+}
+async function doLogout(){ await sb.auth.signOut(); location.reload(); }
+
+async function afterLogin(){
+  const { data: { user } } = await sb.auth.getUser();
+  if(!user) return;
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if(error || !profile){
+    document.getElementById('loginError').textContent = 'No profile found for this account. Ask the owner to add you in Supabase.';
+    document.getElementById('loginError').style.display = 'block';
+    return;
+  }
+  myRole = profile.role;
+  myUserId = user.id;
+  myFullName = profile.full_name || '';
+  myLang = profile.language || 'en';
+  myCurrency = profile.currency || 'USD';
+  document.getElementById('langSwitcher').value = myLang;
+  applyTheme(profile.theme || 'light');
+  document.getElementById('themeSwitcher').value = profile.theme || 'light';
+
+  const { data: htgRow } = await sb.from('adaga_settings').select('value').eq('key','usd_to_htg_rate').maybeSingle();
+  const { data: dopRow } = await sb.from('adaga_settings').select('value').eq('key','usd_to_dop_rate').maybeSingle();
+  rateHtg = htgRow ? Number(htgRow.value) : 130.7;
+  rateDop = dopRow ? Number(dopRow.value) : 60;
+
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appRoot').classList.remove('hidden');
+
+  if(myRole === 'owner'){
+    document.getElementById('roleTag').textContent = 'Full access';
+    document.getElementById('termsBtn').classList.add('hidden');
+    document.getElementById('workAppView').classList.remove('hidden');
+    await initWorkApp();
+  } else if(myRole === 'office_manager'){
+    document.getElementById('roleTag').textContent = 'Office Manager — Internet, Water, Windows payments';
+    document.querySelectorAll('.owner-only').forEach(el=>el.classList.add('hidden'));
+    document.querySelectorAll('.office-manager-hide').forEach(el=>el.classList.add('hidden'));
+    document.getElementById('cashierAddJobCard').classList.remove('hidden');
+    document.getElementById('workAppView').classList.remove('hidden');
+    await initWorkApp();
+  } else if(myRole === 'father'){
+    document.getElementById('roleTag').textContent = 'Father — Windows division manager';
+    document.querySelectorAll('.owner-only').forEach(el=>el.classList.add('hidden'));
+    document.querySelectorAll('.father-hide').forEach(el=>el.classList.add('hidden'));
+    const divSel = document.querySelector('#form-expense select[name="division"]');
+    if(divSel){ divSel.innerHTML = '<option value="windows">Windows</option>'; divSel.disabled = true; }
+    document.getElementById('workAppView').classList.remove('hidden');
+    await initWorkApp();
+  } else {
+    document.getElementById('roleTag').textContent = 'Windows division view';
+    document.getElementById('fatherView').classList.remove('hidden');
+    await initFatherView();
+  }
+  applyTranslations();
+}
+
+// ---------- FATHER VIEW ----------
+async function initFatherView(){
+  const { data, error } = await sb.rpc('get_windows_summary');
+  if(error){ console.error(error); return; }
+  const rows = data || [];
+  const mk = thisMonthKey();
+  const thisMonth = rows.find(r=>r.month===mk) || { income:0, expense:0, net:0 };
+  document.getElementById('f-income').textContent = disp(thisMonth.income,'USD');
+  document.getElementById('f-net').textContent = disp(thisMonth.net,'USD');
+  document.getElementById('f-net-sub').textContent = `income ${disp(thisMonth.income,'USD')} − expenses ${disp(thisMonth.expense,'USD')}`;
+  const maxIncome = Math.max(1, ...rows.map(r=>r.income));
+  document.getElementById('f-trend').innerHTML = rows.length ? rows.map(r=>`
+    <div class="bar-row"><div class="lbl"><span>${r.month}</span><span>${disp(r.income,'USD')} in · ${disp(r.expense,'USD')} out</span></div><div class="bar-track"><div class="bar-fill" style="width:${(r.income/maxIncome)*100}%"></div></div></div>
+  `).join('') : '<div class="empty">No windows activity logged yet.</div>';
+}
+
+// ---------- OWNER / OFFICE MANAGER / FATHER SHARED APP ----------
+async function initWorkApp(){
+  if(canManageWindows()){
+    const { data: rc } = await sb.from('adaga_rate_card').select('*').order('product_type');
+    rateCardList = (rc||[]).map(r=>r.product_type);
+    rateCardMap = Object.fromEntries((rc||[]).map(r=>[r.product_type, { rate:Number(r.rate), unit:r.unit }]));
+  } else if(isOfficeManager()){
+    const { data: rcTypes } = await sb.from('adaga_rate_card_types_view').select('product_type').order('product_type');
+    cashierProductTypes = (rcTypes||[]).map(r=>r.product_type);
+  }
+  const { data: mats } = await sb.from('adaga_materials_catalog').select('*').order('name');
+  materialsCatalog = mats || [];
+
+  if(isOwner()){
+    document.getElementById('htgRateInput').value = rateHtg;
+    document.getElementById('dopRateInput').value = rateDop;
+    await initUsersTab();
+  }
+  await refreshAll();
+  bindEvents();
+}
+
+async function refreshAll(){
+  const windowsQuery = canManageWindows()
+    ? sb.from('adaga_window_jobs').select('*').order('created_at',{ascending:false})
+    : sb.from('adaga_window_jobs_office_view').select('*').order('created_at',{ascending:false});
+
+  const [i,w,j,c,fl] = await Promise.all([
+    sb.from('adaga_internet_customers').select('*').order('created_at',{ascending:false}),
+    sb.from('adaga_water_customers').select('*').order('created_at',{ascending:false}),
+    windowsQuery,
+    sb.from('adaga_cash_log').select('*').order('date',{ascending:false}),
+    sb.from('adaga_flags').select('*').order('created_at',{ascending:false})
+  ]);
+  state.internet = i.data || [];
+  state.water = w.data || [];
+  state.windows = j.data || [];
+  state.cashLog = c.data || [];
+  state.flags = fl.data || [];
+  renderAll();
+}
+
+function bindEvents(){
+  document.getElementById('tabs').addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-tab]'); if(!btn) return;
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+
+  function lineItemArea(li){ return (parseFloat(li.width)||0) * (parseFloat(li.height)||0) / 144 * (parseInt(li.qty)||0); }
+
+  function typeOptionsHtml(selected, options){
+    return options.map(pt=>`<option value="${pt}" ${pt===selected?'selected':''}>${pt}</option>`).join('');
+  }
+
+  async function renderCashierLineItemsTable(){
+    const wrap = document.getElementById('cashierLineItemsTable');
+    if(!wrap) return;
+    const typeOpts = cashierProductTypes.length ? cashierProductTypes : ['Window'];
+    const rowsHtml = currentLineItems.map((li,idx)=>{
+      const area = lineItemArea(li);
+      return `<tr>
+        <td>${idx+1}</td>
+        <td><select class="li-input" style="width:120px;" onchange="updateLineItem(${idx},'productType',this.value)">${typeOptionsHtml(li.productType, typeOpts)}</select></td>
+        <td><input class="li-input" type="number" step="0.01" value="${li.width}" oninput="updateLineItem(${idx},'width',this.value)" placeholder="Width"></td>
+        <td><input class="li-input" type="number" step="0.01" value="${li.height}" oninput="updateLineItem(${idx},'height',this.value)" placeholder="Height"></td>
+        <td><input class="li-input" type="number" step="1" min="1" value="${li.qty}" oninput="updateLineItem(${idx},'qty',this.value)" placeholder="Qty" style="width:50px;"></td>
+        <td>${fmt(area)} sqft</td>
+        <td>${currentLineItems.length>1 ? `<button type="button" class="btn btn-danger btn-sm" onclick="removeLineItemRow(${idx})">🗑</button>` : ''}</td>
+      </tr>`;
+    }).join('');
+    const totalQty = currentLineItems.reduce((a,li)=>a+(parseInt(li.qty)||0),0);
+    const totalArea = currentLineItems.reduce((a,li)=>a+lineItemArea(li),0);
+    wrap.innerHTML = `<thead><tr><th>#</th><th>Type</th><th>Width (in)</th><th>Height (in)</th><th>Qty</th><th>Area</th><th></th></tr></thead>
+      <tbody>${rowsHtml}
+      <tr style="font-weight:700;"><td colspan="4">Totals</td><td>${totalQty}</td><td>${fmt(totalArea)} sqft</td><td></td></tr>
+      <tr><td colspan="7" id="cashierTotalRow" style="font-weight:700;color:var(--success);padding-top:10px;">Calculating total…</td></tr>
+      </tbody>`;
+
+    const ccySel = document.querySelector('#form-cashier-windows [name="currency"]');
+    const ccy = ccySel ? ccySel.value : 'HTG';
+    const { data, error } = await sb.rpc('calc_job_total', { line_items: currentLineItems, target_currency: ccy });
+    const totalRow = document.getElementById('cashierTotalRow');
+    if(totalRow){
+      totalRow.textContent = error ? 'Could not calculate total right now.' : `Total: ${CURRENCY_SYMBOLS[ccy]||''}${fmt(data)} ${ccy}`;
+    }
+  }
+
+  window.updateLineItem = function(idx, field, value){
+    currentLineItems[idx][field] = value;
+    if(canManageWindows()) renderLineItemsTable();
+    if(isOfficeManager()) renderCashierLineItemsTable();
+  };
+  window.addLineItemRow = function(){
+    currentLineItems.push({ width:'', height:'', qty:1, productType: canManageWindows() ? (rateCardList[0]||'Window') : (cashierProductTypes[0]||'Window') });
+    if(canManageWindows()) renderLineItemsTable();
+    if(isOfficeManager()) renderCashierLineItemsTable();
+  };
+  window.removeLineItemRow = function(idx){
+    currentLineItems.splice(idx,1);
+    if(canManageWindows()) renderLineItemsTable();
+    if(isOfficeManager()) renderCashierLineItemsTable();
+  };
+
+  function itemAmountUSD(li){
+    const rc = rateCardMap[li.productType] || { rate: 75, unit: 'sqft' };
+    if(rc.unit === 'flat') return rc.rate * (parseInt(li.qty)||0);
+    return lineItemArea(li) * rc.rate;
+  }
+
+  if(canManageWindows()){
+    const finalPriceInput = document.getElementById('finalPriceInput');
+    const jobCurrencySelect = document.getElementById('jobCurrencySelect');
+
+    function renderLineItemsTable(){
+      const wrap = document.getElementById('lineItemsTable');
+      const ccy = jobCurrencySelect.value;
+      const rowsHtml = currentLineItems.map((li,idx)=>{
+        const area = lineItemArea(li);
+        const rc = rateCardMap[li.productType] || { rate: 75, unit: 'sqft' };
+        const amount = convertUSDTo(itemAmountUSD(li), ccy);
+        return `<tr>
+          <td>${idx+1}</td>
+          <td><select class="li-input" style="width:130px;" onchange="updateLineItem(${idx},'productType',this.value)">${typeOptionsHtml(li.productType, rateCardList)}</select></td>
+          <td><input class="li-input" type="number" step="0.01" value="${li.width}" oninput="updateLineItem(${idx},'width',this.value)" placeholder="Width" ${rc.unit==='flat' ? 'disabled' : ''}></td>
+          <td><input class="li-input" type="number" step="0.01" value="${li.height}" oninput="updateLineItem(${idx},'height',this.value)" placeholder="Height" ${rc.unit==='flat' ? 'disabled' : ''}></td>
+          <td><input class="li-input" type="number" step="1" min="1" value="${li.qty}" oninput="updateLineItem(${idx},'qty',this.value)" placeholder="Qty" style="width:50px;"></td>
+          <td>${rc.unit==='flat' ? '—' : fmt(area)+' sqft'}</td>
+          <td>${rc.unit==='flat' ? 'flat' : '$'+rc.rate+'/sqft'}</td>
+          <td>${CURRENCY_SYMBOLS[ccy]||''}${fmt(amount)}</td>
+          <td>${currentLineItems.length>1 ? `<button type="button" class="btn btn-danger btn-sm" onclick="removeLineItemRow(${idx})">🗑</button>` : ''}</td>
+        </tr>`;
+      }).join('');
+      const totalQty = currentLineItems.reduce((a,li)=>a+(parseInt(li.qty)||0),0);
+      const totalArea = currentLineItems.reduce((a,li)=>a+lineItemArea(li),0);
+      const totalUSD = currentLineItems.reduce((a,li)=>a+itemAmountUSD(li),0);
+      const totalAmount = convertUSDTo(totalUSD, ccy);
+      wrap.innerHTML = `<thead><tr><th>#</th><th>Type</th><th>Width (in)</th><th>Height (in)</th><th>Qty</th><th>Area</th><th>Rate</th><th>Amount</th><th></th></tr></thead>
+        <tbody>${rowsHtml}
+        <tr style="font-weight:700;"><td colspan="4">Totals</td><td>${totalQty}</td><td>${fmt(totalArea)} sqft</td><td></td><td>${CURRENCY_SYMBOLS[ccy]||''}${fmt(totalAmount)}</td><td></td></tr>
+        </tbody>`;
+      updatePricingSummary();
+    }
+
+    function updatePricingSummary(){
+      const ccy = jobCurrencySelect.value;
+      const totalQty = currentLineItems.reduce((a,li)=>a+(parseInt(li.qty)||0),0);
+      const totalArea = currentLineItems.reduce((a,li)=>a+lineItemArea(li),0);
+      const totalUSD = currentLineItems.reduce((a,li)=>a+itemAmountUSD(li),0);
+      const suggested = convertUSDTo(totalUSD, ccy);
+      const sym = CURRENCY_SYMBOLS[ccy]||'';
+      document.getElementById('pricingSummaryGrid').innerHTML = `
+        <div class="mini-stat"><div class="lbl">Total windows</div><div class="val">${totalQty}</div></div>
+        <div class="mini-stat"><div class="lbl">Total area</div><div class="val">${fmt(totalArea)} sqft</div></div>
+        <div class="mini-stat total"><div class="lbl">Suggested price</div><div class="val">${sym}${fmt(suggested)}</div></div>`;
+      document.getElementById('suggestedPriceHint').textContent = `Suggested price: ${sym}${fmt(suggested)} ${ccy}, based on the rate card for each item's type. Edit "Final agreed price" if you negotiated a different number.`;
+      if(!finalPriceInput.value) finalPriceInput.placeholder = `Final agreed price (${fmt(suggested)} ${ccy} suggested)`;
+      updateProfitSummary(suggested, ccy);
+    }
+
+    function updateProfitSummary(suggestedPrice, ccy){
+      const f = document.getElementById('form-windows');
+      const customerTotal = parseFloat(finalPriceInput.value) || suggestedPrice;
+      const costs = (parseFloat(f.materialCost.value)||0) + (parseFloat(f.transportCost.value)||0) + (parseFloat(f.fabricationCost.value)||0) + (parseFloat(f.installationCost.value)||0) + (parseFloat(f.otherCost.value)||0);
+      const profit = customerTotal - costs;
+      const sym = CURRENCY_SYMBOLS[ccy]||'';
+      document.getElementById('profitSummaryGrid').innerHTML = `
+        <div class="mini-stat"><div class="lbl">Customer total</div><div class="val">${sym}${fmt(customerTotal)}</div></div>
+        <div class="mini-stat neg"><div class="lbl">Total costs</div><div class="val">-${sym}${fmt(costs)}</div></div>
+        <div class="mini-stat total"><div class="lbl">Estimated profit</div><div class="val">${sym}${fmt(profit)}</div></div>`;
+    }
+
+    jobCurrencySelect.addEventListener('change', renderLineItemsTable);
+    document.getElementById('form-windows').addEventListener('input', e=>{
+      if(['finalPrice','materialCost','transportCost','fabricationCost','installationCost','otherCost'].includes(e.target.name)){
+        updatePricingSummary();
+      }
+    });
+    renderLineItemsTable();
+
+    document.getElementById('form-windows').addEventListener('submit', async e=>{
+      e.preventDefault(); const f = e.target;
+      const jobCurrency = f.currency.value;
+      const totalUSD = currentLineItems.reduce((a,li)=>a+itemAmountUSD(li),0);
+      const calc = convertUSDTo(totalUSD, jobCurrency);
+      const payload = {
+        customer: f.customer.value.trim(), phone: f.phone.value.trim(), address: f.address.value.trim(),
+        glass_type: f.glassType.value || null, aluminum_color: f.aluminumColor.value || null,
+        description: f.description.value.trim(), line_items: currentLineItems,
+        currency: jobCurrency, calculated_price: calc,
+        final_price: parseFloat(f.finalPrice.value) || calc,
+        material_cost: parseFloat(f.materialCost.value)||0, transport_cost: parseFloat(f.transportCost.value)||0,
+        fabrication_cost: parseFloat(f.fabricationCost.value)||0, installation_cost: parseFloat(f.installationCost.value)||0,
+        other_cost: parseFloat(f.otherCost.value)||0,
+        due_date: f.dueDate.value || null
+      };
+      if(editingJobId){
+        await sb.from('adaga_window_jobs').update(payload).eq('id', editingJobId);
+        showToast('Job updated.');
+      } else {
+        await sb.from('adaga_window_jobs').insert({ ...payload, status:'quoted', received:0, created_by: myUserId, created_by_name: myFullName || myRole });
+      }
+      cancelEditJob();
+      await refreshAll();
+    });
+  }
+
+  window.startEditJob = function(id){
+    const j = state.windows.find(x=>x.id===id); if(!j) return;
+    const f = document.getElementById('form-windows');
+    f.customer.value = j.customer || ''; f.phone.value = j.phone || ''; f.address.value = j.address || '';
+    f.glassType.value = j.glass_type || ''; f.aluminumColor.value = j.aluminum_color || '';
+    f.description.value = j.description || ''; f.currency.value = j.currency || 'HTG';
+    f.dueDate.value = j.due_date || '';
+    f.finalPrice.value = j.final_price || ''; f.materialCost.value = j.material_cost || 0;
+    f.transportCost.value = j.transport_cost || 0; f.fabricationCost.value = j.fabrication_cost || 0;
+    f.installationCost.value = j.installation_cost || 0; f.otherCost.value = j.other_cost || 0;
+    currentLineItems = (Array.isArray(j.line_items) && j.line_items.length) ? JSON.parse(JSON.stringify(j.line_items)) : [{ width:'', height:'', qty:1, productType: rateCardList[0]||'Window' }];
+    editingJobId = id;
+    document.getElementById('btnAddJob').textContent = 'Save changes';
+    document.getElementById('btnCancelEditJob').classList.remove('hidden');
+    if(typeof renderLineItemsTable === 'function') renderLineItemsTable();
+    document.getElementById('addJobCard').scrollIntoView({ behavior:'smooth', block:'start' });
+  };
+  window.cancelEditJob = function(){
+    editingJobId = null;
+    const f = document.getElementById('form-windows');
+    if(f) f.reset();
+    currentLineItems = [{ width:'', height:'', qty:1, productType: rateCardList[0]||'Window' }];
+    document.getElementById('btnAddJob').textContent = t('addJob');
+    document.getElementById('btnCancelEditJob').classList.add('hidden');
+    if(typeof renderLineItemsTable === 'function') renderLineItemsTable();
+  };
+
+  if(isOfficeManager()){
+    renderCashierLineItemsTable();
+    document.querySelector('#form-cashier-windows [name="currency"]').addEventListener('change', renderCashierLineItemsTable);
+    document.getElementById('form-cashier-windows').addEventListener('submit', async e=>{
+      e.preventDefault(); const f = e.target;
+      await sb.from('adaga_window_jobs').insert({
+        customer: f.customer.value.trim(), phone: f.phone.value.trim(), address: f.address.value.trim(),
+        glass_type: f.glassType.value || null, aluminum_color: f.aluminumColor.value || null,
+        description: f.description.value.trim(), line_items: currentLineItems,
+        currency: f.currency.value, due_date: f.dueDate.value || null, status:'quoted', received:0,
+        created_by: myUserId, created_by_name: myFullName || 'Cashier'
+      });
+      f.reset();
+      currentLineItems = [{ width:'', height:'', qty:1, productType: cashierProductTypes[0]||'Window' }];
+      renderCashierLineItemsTable();
+      showToast('Job details submitted — the owner or father will set pricing.');
+      await refreshAll();
+    });
+  }
+
+  document.getElementById('form-expense').addEventListener('submit', async e=>{
+    e.preventDefault(); const f = e.target;
+    await sb.from('adaga_cash_log').insert({ date: todayStr(), division:f.division.value, type:'expense', expense_type:f.expenseType.value, amount: parseFloat(f.amount.value)||0, currency: f.currency.value, note: f.note.value.trim()||'(expense)' });
+    f.reset(); await refreshAll();
+  });
+
+  if(canManageWindows()){
+    renderRateCardTable();
+    renderMaterialsCatalogTable();
+  }
+
+  populateSellMaterialSelect();
+  document.getElementById('sellMaterialSelect').addEventListener('change', updateMaterialSaleHint);
+  document.querySelector('#form-sell-material [name="qty"]').addEventListener('input', updateMaterialSaleHint);
+  updateMaterialSaleHint();
+  document.getElementById('form-sell-material').addEventListener('submit', async e=>{
+    e.preventDefault(); const f = e.target;
+    const item = materialsCatalog.find(m=>m.id===f.itemId.value);
+    if(!item){ showToast('Pick an item first.', 'error'); return; }
+    const qty = parseInt(f.qty.value)||1;
+    const amount = Number(item.price) * qty;
+    await sb.from('adaga_cash_log').insert({
+      date: todayStr(), division:'windows', type:'income', amount, currency: item.currency,
+      note: `Material sale — ${item.name} x${qty}`
+    });
+    showToast(`Sold ${qty} × ${item.name}.`);
+    f.qty.value = 1;
+    await refreshAll();
+  });
+
+  if(isOwner()){
+    document.getElementById('form-adduser').addEventListener('submit', async e=>{
+      e.preventDefault(); const f = e.target;
+      const email = f.email.value.trim(), password = f.password.value, fullName = f.fullName.value.trim();
+      const language = f.language.value, currency = f.currency.value;
+      const tempClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession:false, autoRefreshToken:false } });
+      const { data, error } = await tempClient.auth.signUp({ email, password });
+      if(error){ showToast('Could not create account: '+error.message, 'error'); return; }
+      const newId = (data.user && data.user.id) || (data.session && data.session.user && data.session.user.id);
+      if(!newId){ showToast('Account created, but the new user ID was not returned. Check Supabase → Authentication → Users.', 'error'); return; }
+      const { error: profError } = await sb.from('profiles').insert({ id:newId, role:'office_manager', full_name: fullName, email, language, currency });
+      if(profError){ showToast('Account created, but saving their profile failed: '+profError.message, 'error'); return; }
+      showToast('Office Manager account created.');
+      f.reset();
+      await initUsersTab();
+    });
+
+    document.getElementById('form-rates').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const htg = parseFloat(document.getElementById('htgRateInput').value)||rateHtg;
+      const dop = parseFloat(document.getElementById('dopRateInput').value)||rateDop;
+      await sb.from('adaga_settings').upsert({ key:'usd_to_htg_rate', value: htg });
+      await sb.from('adaga_settings').upsert({ key:'usd_to_dop_rate', value: dop });
+      rateHtg = htg; rateDop = dop;
+      showToast('Exchange rates saved.');
+      await refreshAll();
+    });
+  }
+
+  document.getElementById('form-internet').addEventListener('submit', async e=>{
+    e.preventDefault(); const f = e.target;
+    await sb.from('adaga_internet_customers').insert({
+      name:f.name.value.trim(), phone:f.phone.value.trim(), address:f.address.value.trim(),
+      fee: parseFloat(f.fee.value)||0, fee_currency: f.feeCurrency.value, install_date: f.installDate.value || todayStr(), last_payment:null
+    });
+    f.reset(); await refreshAll();
+  });
+
+  document.getElementById('form-water').addEventListener('submit', async e=>{
+    e.preventDefault(); const f = e.target;
+    const plan = f.plan.value;
+    const bucketTotal = plan === 'bucket5' ? 5 : (plan === 'bucket10' ? 10 : null);
+    await sb.from('adaga_water_customers').insert({
+      name:f.name.value.trim(), phone:f.phone.value.trim(), plan,
+      bucket_total: bucketTotal, bucket_remaining: bucketTotal, last_payment:null
+    });
+    f.reset(); await refreshAll();
+  });
+
+  document.getElementById('cash-filter').addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-f]'); if(!btn) return;
+    cashFilter = btn.dataset.f;
+    document.querySelectorAll('#cash-filter button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCash();
+  });
+
+  document.getElementById('paymentModalForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const amount = parseFloat(document.getElementById('paymentAmountInput').value)||0;
+    const currency = document.getElementById('paymentCurrencyInput').value;
+    const ctx = paymentModalContext;
+    closePaymentModal();
+    if(!ctx) return;
+    if(ctx.type === 'internet') await doMarkInternetPaid(ctx.id, amount, currency);
+    else if(ctx.type === 'window') await doLogWindowPayment(ctx.id, amount, currency);
+    else if(ctx.type === 'water') await doLogWaterPayment(ctx.id, amount, currency);
+  });
+}
+
+document.getElementById('langSwitcher').addEventListener('change', async e=>{
+  myLang = e.target.value;
+  if(myUserId){ await sb.from('profiles').update({ language: myLang }).eq('id', myUserId); }
+  applyTranslations();
+  renderAll();
+});
+
+document.getElementById('themeSwitcher').addEventListener('change', async e=>{
+  const theme = e.target.value;
+  applyTheme(theme);
+  if(myUserId){ await sb.from('profiles').update({ theme }).eq('id', myUserId); }
+});
+
+// ---------- RATE CARD (owner/father) ----------
+function renderRateCardTable(){
+  const tbl = document.getElementById('table-rate-card');
+  if(!tbl) return;
+  if(!rateCardList.length){ tbl.innerHTML = '<tr><td><div class="empty">No item types yet. Add one below.</div></td></tr>'; return; }
+  tbl.innerHTML = `<thead><tr><th>Item type</th><th>Rate</th><th>Unit</th><th></th></tr></thead><tbody>${rateCardList.map(pt=>{
+    const rc = rateCardMap[pt];
+    return `<tr><td><b>${pt}</b></td><td>$${fmt(rc.rate)}</td><td>${rc.unit==='flat' ? 'Flat (per item)' : 'Per sqft'}</td><td><div class="row-actions"><button class="btn btn-ghost btn-sm" onclick="addRateCardEntry('${pt}')">Edit</button><button class="btn btn-danger btn-sm" onclick="deleteRateCardEntry('${pt}')">Delete</button></div></td></tr>`;
+  }).join('')}</tbody>`;
+}
+function addRateCardEntry(existingType){
+  const rc = existingType ? rateCardMap[existingType] : null;
+  openFieldModal(existingType ? 'Edit rate — '+existingType : 'Add item type', [
+    { name:'productType', label:'Item type name (e.g. Sliding Window, Glasses Table)', type:'text', value: existingType||'' },
+    { name:'rate', label:'Rate ($)', type:'number', value: rc ? rc.rate : '' },
+    { name:'unit', label:'Pricing basis', type:'select', value: rc ? rc.unit : 'sqft', options:[
+      {value:'sqft', label:'Per sqft (width × height × qty)'},
+      {value:'flat', label:'Flat (rate × qty, ignores size)'}
+    ] }
+  ], { type:'rateCard', id: existingType || null });
+}
+async function doSaveRateCard(oldType, values){
+  const newType = (values.productType||'').trim();
+  if(!newType){ showToast('Item type name is required.', 'error'); return; }
+  if(oldType && oldType !== newType){
+    await sb.from('adaga_rate_card').delete().eq('product_type', oldType);
+  }
+  await sb.from('adaga_rate_card').upsert({ product_type: newType, rate: parseFloat(values.rate)||0, unit: values.unit });
+  showToast('Rate card updated.');
+  await initWorkApp();
+}
+function deleteRateCardEntry(productType){
+  askConfirm(`Delete "${productType}" from the rate card?`, async ()=>{
+    await sb.from('adaga_rate_card').delete().eq('product_type', productType);
+    showToast('Deleted.');
+    await initWorkApp();
+  });
+}
+
+// ---------- MATERIALS CATALOG ----------
+function renderMaterialsCatalogTable(){
+  const tbl = document.getElementById('table-materials-catalog');
+  if(!tbl) return;
+  if(!materialsCatalog.length){ tbl.innerHTML = '<tr><td><div class="empty">No items yet. Add one below.</div></td></tr>'; return; }
+  tbl.innerHTML = `<thead><tr><th>Item</th><th>Unit</th><th>Price</th><th></th></tr></thead><tbody>${materialsCatalog.map(m=>`
+    <tr><td><b>${m.name}</b></td><td>${m.unit_label}</td><td>${CURRENCY_SYMBOLS[m.currency]||''}${fmt(m.price)} ${m.currency}</td><td><div class="row-actions"><button class="btn btn-ghost btn-sm" onclick="editMaterialCatalogEntry('${m.id}')">Edit</button><button class="btn btn-danger btn-sm" onclick="deleteMaterialCatalogEntry('${m.id}')">Delete</button></div></td></tr>`).join('')}</tbody>`;
+}
+function addMaterialCatalogEntry(){
+  openFieldModal('Add catalog item', [
+    { name:'name', label:'Item name (e.g. Glass sheet, Lock set)', type:'text', value:'' },
+    { name:'unitLabel', label:'Unit (e.g. piece, box, meter)', type:'text', value:'piece' },
+    { name:'price', label:'Price', type:'number', value:'' },
+    { name:'currency', label:'Currency', type:'select', value:'HTG', options:[
+      {value:'HTG',label:'HTG'},{value:'USD',label:'USD'},{value:'DOP',label:'RD$ (DOP)'}] }
+  ], { type:'materialCatalog', id: null });
+}
+function editMaterialCatalogEntry(id){
+  const m = materialsCatalog.find(x=>x.id===id); if(!m) return;
+  openFieldModal('Edit catalog item — '+m.name, [
+    { name:'name', label:'Item name', type:'text', value:m.name },
+    { name:'unitLabel', label:'Unit', type:'text', value:m.unit_label },
+    { name:'price', label:'Price', type:'number', value:m.price },
+    { name:'currency', label:'Currency', type:'select', value:m.currency, options:[
+      {value:'HTG',label:'HTG'},{value:'USD',label:'USD'},{value:'DOP',label:'RD$ (DOP)'}] }
+  ], { type:'materialCatalog', id: m.id });
+}
+async function doSaveMaterialCatalog(id, values){
+  const payload = { name: values.name.trim(), unit_label: values.unitLabel.trim()||'piece', price: parseFloat(values.price)||0, currency: values.currency };
+  if(id) await sb.from('adaga_materials_catalog').update(payload).eq('id', id);
+  else await sb.from('adaga_materials_catalog').insert(payload);
+  showToast('Catalog updated.');
+  await initWorkApp();
+}
+function deleteMaterialCatalogEntry(id){
+  askConfirm('Delete this catalog item?', async ()=>{
+    await sb.from('adaga_materials_catalog').delete().eq('id', id);
+    showToast('Deleted.');
+    await initWorkApp();
+  });
+}
+function populateSellMaterialSelect(){
+  const sel = document.getElementById('sellMaterialSelect');
+  if(!sel) return;
+  sel.innerHTML = materialsCatalog.length
+    ? materialsCatalog.map(m=>`<option value="${m.id}">${m.name} — ${CURRENCY_SYMBOLS[m.currency]||''}${fmt(m.price)} ${m.currency}/${m.unit_label}</option>`).join('')
+    : '<option value="">No items in catalog yet</option>';
+}
+function updateMaterialSaleHint(){
+  const sel = document.getElementById('sellMaterialSelect');
+  const qtyInput = document.querySelector('#form-sell-material [name="qty"]');
+  const hint = document.getElementById('materialSaleHint');
+  if(!sel || !hint) return;
+  const item = materialsCatalog.find(m=>m.id===sel.value);
+  if(!item){ hint.textContent = 'Pick an item to see the total.'; return; }
+  const qty = parseInt(qtyInput.value)||1;
+  hint.textContent = `Total: ${CURRENCY_SYMBOLS[item.currency]||''}${fmt(Number(item.price)*qty)} ${item.currency}`;
+}
+function renderRecentMaterialSales(){
+  const el = document.getElementById('recent-material-sales');
+  if(!el) return;
+  const sales = state.cashLog.filter(e=>e.note && e.note.startsWith('Material sale —')).slice(0,10);
+  el.innerHTML = sales.length ? sales.map(e=>`
+    <div class="activity-item"><div><b>${e.note}</b><div style="color:var(--muted);font-size:11px;">${e.date}</div></div><div class="amt-income">+${disp(e.amount, e.currency||'HTG')}</div></div>
+  `).join('') : '<div class="empty">No material sales yet.</div>';
+}
+
+// ---------- USERS TAB ----------
+async function initUsersTab(){
+  const { data } = await sb.from('profiles').select('*').order('role');
+  usersCache = data || [];
+  renderUsers();
+}
+function renderUsers(){
+  const tbl = document.getElementById('table-users');
+  if(!tbl) return;
+  if(!usersCache.length){ tbl.innerHTML = '<tr><td><div class="empty">No users yet.</div></td></tr>'; return; }
+  tbl.innerHTML = `<thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Language</th><th>Currency</th><th></th></tr></thead><tbody>${usersCache.map(u=>`
+    <tr><td>${u.full_name||'—'}</td><td>${u.email||'—'}</td><td style="text-transform:capitalize;">${(u.role||'').replace('_',' ')}</td><td>${u.language}</td><td>${u.currency}</td>
+    <td><div class="row-actions">
+      <button class="btn btn-ghost btn-sm" onclick="editUserPrefs('${u.id}')">Edit prefs</button>
+      ${['office_manager','father'].includes(u.role) ? `<button class="btn btn-ghost btn-sm" onclick="openTermsFor('${u.role}')">View/Edit Terms</button>` : ''}
+    </div></td></tr>`).join('')}</tbody>`;
+}
+function editUserPrefs(id){
+  const u = usersCache.find(x=>x.id===id); if(!u) return;
+  openFieldModal('Edit preferences — '+(u.full_name||''), [
+    { name:'language', label:'Language', type:'select', value:u.language, options:[
+      {value:'en',label:'English'},{value:'ht',label:'Haitian Creole'},{value:'fr',label:'French'}] },
+    { name:'currency', label:'Currency', type:'select', value:u.currency, options:[
+      {value:'HTG',label:'HTG'},{value:'USD',label:'USD'},{value:'DOP',label:'RD$ (DOP)'}] }
+  ], { type:'userPrefs', id });
+}
+async function doEditUserPrefs(id, values){
+  await sb.from('profiles').update({ language: values.language, currency: values.currency }).eq('id', id);
+  showToast('Preferences updated.');
+  await initUsersTab();
+}
+
+// ---------- INTERNET ACTIONS ----------
+function markInternetPaid(id){
+  const c = state.internet.find(x=>x.id===id); if(!c) return;
+  openPaymentModal(`Amount received from ${c.name}`, c.fee, c.fee_currency || 'HTG', { type:'internet', id });
+}
+async function doMarkInternetPaid(id, amount, currency){
+  const c = state.internet.find(x=>x.id===id); if(!c) return;
+  const date = todayStr();
+  await sb.from('adaga_internet_customers').update({ last_payment: date }).eq('id', id);
+  const { data: inserted } = await sb.from('adaga_cash_log').insert({ date, division:'internet', type:'income', amount, currency, note:`Payment — ${c.name}` }).select().single();
+  await refreshAll();
+  const receipt = inserted ? inserted.receipt_number : '(pending)';
+  const text = `ADAGA WINDOWS @ PLANT — Payment Receipt\nReceipt #: ${receipt}\nCustomer: ${c.name}\nService: Internet — Monthly plan\nAmount received: ${CURRENCY_SYMBOLS[currency]||''}${fmt(amount)} (${currency})\nDate: ${date}\nThank you for your business!`;
+  showInvoiceModal(text, c.phone);
+}
+function deleteInternet(id){ askConfirm('Remove this customer?', async ()=>{ await sb.from('adaga_internet_customers').delete().eq('id', id); await refreshAll(); }); }
+
+// ---------- WATER ACTIONS ----------
+function logWaterPayment(id){
+  const c = state.water.find(x=>x.id===id); if(!c) return;
+  const defaultAmount = c.plan==='weekly' ? 75 : (c.plan==='bucket10' ? 50 : 25);
+  openPaymentModal(`Amount received from ${c.name}`, defaultAmount, 'HTG', { type:'water', id });
+}
+async function doLogWaterPayment(id, amount, currency){
+  const c = state.water.find(x=>x.id===id); if(!c) return;
+  const date = todayStr();
+  if(c.plan==='weekly'){
+    await sb.from('adaga_water_customers').update({ last_payment: date }).eq('id', id);
+    await sb.from('adaga_cash_log').insert({ date, division:'water', type:'income', amount, currency, note:`Water weekly — ${c.name}` });
+  } else {
+    const total = c.bucket_total || (c.plan==='bucket10' ? 10 : 5);
+    await sb.from('adaga_water_customers').update({ last_payment: date, bucket_remaining: total }).eq('id', id);
+    await sb.from('adaga_cash_log').insert({ date, division:'water', type:'income', amount, currency, note:`Water pack (${total}) — ${c.name}` });
+  }
+  await refreshAll();
+}
+function logWaterPickup(id){
+  const c = state.water.find(x=>x.id===id); if(!c) return;
+  openFieldModal('Log pickup — '+c.name, [
+    { name:'qty', label:'Buckets taken', type:'number', value:1 }
+  ], { type:'waterPickup', id });
+}
+async function doLogWaterPickup(id, values){
+  const c = state.water.find(x=>x.id===id); if(!c) return;
+  const n = parseInt(values.qty)||0;
+  const remaining = (c.bucket_remaining==null ? 0 : c.bucket_remaining) - n;
+  if(remaining < 0){ showToast(`${c.name} only has ${c.bucket_remaining} buckets left. Sell them a new pack first.`, 'error'); return; }
+  await sb.from('adaga_water_customers').update({ bucket_remaining: remaining }).eq('id', id);
+  await refreshAll();
+}
+function deleteWater(id){ askConfirm('Remove this customer?', async ()=>{ await sb.from('adaga_water_customers').delete().eq('id', id); await refreshAll(); }); }
+
+// ---------- WINDOWS ACTIONS ----------
+async function cycleWindowStatus(id){
+  const { error } = await sb.rpc('advance_window_status', { job_id: id });
+  if(error){ showToast(error.message, 'error'); return; }
+  await refreshAll();
+}
+function logWindowPayment(id){
+  const j = state.windows.find(x=>x.id===id); if(!j) return;
+  openPaymentModal(`Amount received from ${j.customer}`, '', j.currency || 'HTG', { type:'window', id });
+}
+async function doLogWindowPayment(id, amount, currency){
+  const j = state.windows.find(x=>x.id===id); if(!j) return;
+  const { error } = await sb.rpc('log_window_payment', { job_id: id, pay_amount: amount, pay_currency: currency });
+  if(error){ showToast(error.message, 'error'); return; }
+  await refreshAll();
+  const updated = state.windows.find(x=>x.id===id);
+  const latestReceipt = [...state.cashLog].filter(e=>e.division==='windows' && e.note && e.note.includes(j.customer)).sort((a,b)=>b.date.localeCompare(a.date))[0];
+  const receipt = latestReceipt ? latestReceipt.receipt_number : '(pending)';
+  const text = `ADAGA WINDOWS @ PLANT — Invoice\nReceipt #: ${receipt}\nCustomer: ${j.customer}\nPhone: ${j.phone||'—'}\nProduct: ${jobProductSummary(j)}${j.glass_type ? ' — Glass: '+j.glass_type : ''}${j.aluminum_color ? ' — Aluminum: '+j.aluminum_color : ''}\nJob: ${j.description||'—'}\nAmount received: ${CURRENCY_SYMBOLS[currency]||''}${fmt(amount)} (${currency})\nInstallation date: ${j.due_date||'TBD'}\nStatus: ${(updated||j).status}\nThank you!`;
+  showInvoiceModal(text, j.phone);
+}
+function editWindowCosts(id){
+  const j = state.windows.find(x=>x.id===id); if(!j) return;
+  openFieldModal(t('editCosts')+' — '+j.customer, [
+    { name:'finalPrice', label:'Final agreed price', type:'number', value:j.final_price||0 },
+    { name:'material', label:'Material cost', type:'number', value:j.material_cost||0 },
+    { name:'transport', label:'Transport cost', type:'number', value:j.transport_cost||0 },
+    { name:'fabrication', label:'Fabrication cost', type:'number', value:j.fabrication_cost||0 },
+    { name:'installation', label:'Installation cost', type:'number', value:j.installation_cost||0 },
+    { name:'other', label:'Other cost', type:'number', value:j.other_cost||0 }
+  ], { type:'windowCosts', id });
+}
+async function doEditWindowCosts(id, values){
+  await sb.from('adaga_window_jobs').update({
+    final_price: parseFloat(values.finalPrice)||0,
+    material_cost: parseFloat(values.material)||0, transport_cost: parseFloat(values.transport)||0,
+    fabrication_cost: parseFloat(values.fabrication)||0, installation_cost: parseFloat(values.installation)||0,
+    other_cost: parseFloat(values.other)||0
+  }).eq('id', id);
+  showToast('Price & costs updated.');
+  await refreshAll();
+}
+function deleteWindow(id){ askConfirm('Remove this job?', async ()=>{ await sb.from('adaga_window_jobs').delete().eq('id', id); await refreshAll(); }); }
+function deleteCash(id){ askConfirm('Delete this transaction?', async ()=>{ await sb.from('adaga_cash_log').delete().eq('id', id); await refreshAll(); }); }
+
+// ---------- RENDER ----------
+function renderAll(){ renderDashboard(); renderInternet(); renderWater(); renderWindows(); renderCash(); renderRecentMaterialSales(); }
+
+function renderDashboard(){
+  const overdue = state.internet.filter(c=>daysSince(c.last_payment)>30).length;
+  document.getElementById('stat-internet-count').textContent = state.internet.length;
+  document.getElementById('stat-internet-sub').textContent = `customers · ${overdue} overdue`;
+  document.getElementById('stat-water-count').textContent = state.water.length;
+  const openJobs = state.windows.filter(j=>j.status!=='paid in full').length;
+  document.getElementById('stat-windows-count').textContent = openJobs;
+  document.getElementById('stat-windows-sub').textContent = `open of ${state.windows.length} total`;
+
+  let periodEntries;
+  if(isOfficeManager()){
+    periodEntries = state.cashLog; // RLS already limits to last 7 days
+  } else {
+    const mk = thisMonthKey();
+    periodEntries = state.cashLog.filter(e=>e.date.startsWith(mk));
+  }
+  const incomeUSD = periodEntries.filter(e=>e.type==='income').reduce((a,b)=>a+toUSD(b.amount, b.currency || divisionCurrency(b.division)),0);
+  const expenseUSD = periodEntries.filter(e=>e.type==='expense').reduce((a,b)=>a+toUSD(b.amount, b.currency || divisionCurrency(b.division)),0);
+  document.getElementById('stat-net').textContent = fmtMoney(incomeUSD-expenseUSD);
+  document.getElementById('stat-net-sub').textContent = `income ${fmtMoney(incomeUSD)} − expenses ${fmtMoney(expenseUSD)}`;
+
+  const divisions = ['internet','water','windows','general'];
+  const colors = {internet:'var(--internet)',water:'var(--water)',windows:'var(--windows)',general:'#6B7280'};
+  let html = '';
+  divisions.forEach(d=>{
+    const incUSD = periodEntries.filter(e=>e.division===d && e.type==='income').reduce((a,b)=>a+toUSD(b.amount, b.currency || divisionCurrency(b.division)),0);
+    if(incUSD===0) return;
+    html += `<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="font-weight:600;text-transform:capitalize;">${d}</span><span>${fmtMoney(incUSD)}</span></div><div style="height:8px;background:var(--bg);border-radius:6px;overflow:hidden;"><div style="height:100%;width:${incomeUSD>0?Math.min(100,(incUSD/incomeUSD)*100):0}%;background:${colors[d]};"></div></div></div>`;
+  });
+  document.getElementById('income-breakdown').innerHTML = html || '<div class="empty">No income logged yet.</div>';
+
+  const recent = [...state.cashLog].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  document.getElementById('recent-activity').innerHTML = recent.length ? recent.map(e=>`
+    <div class="activity-item"><div><b>${e.note}</b><div style="color:var(--muted);font-size:11px;">${e.date} · ${e.division}${e.receipt_number ? ' · '+e.receipt_number : ''}</div></div><div class="${e.type==='income'?'amt-income':'amt-expense'}">${e.type==='income'?'+':'−'}${disp(e.amount, e.currency || divisionCurrency(e.division))}</div></div>
+  `).join('') : '<div class="empty">No activity yet.</div>';
+}
+
+function renderInternet(){
+  const t2 = document.getElementById('table-internet');
+  if(!state.internet.length){ t2.innerHTML = `<tr><td><div class="empty"><b>No internet customers yet</b>Add your first customer above.</div></td></tr>`; return; }
+  t2.innerHTML = `<thead><tr><th>Name</th><th>Phone</th><th>Fee</th><th>Status</th><th>Last payment</th><th></th></tr></thead><tbody>${state.internet.map(c=>{
+    const overdue = daysSince(c.last_payment) > 30;
+    return `<tr><td><b>${c.name}</b><div style="color:var(--muted);font-size:11px;">${c.address||''}</div></td><td>${c.phone||'—'}</td><td>${disp(c.fee, c.fee_currency||'HTG')}</td><td><span class="badge ${overdue?'badge-overdue':'badge-paid'}">${overdue?'Overdue':'Paid'}</span></td><td>${c.last_payment||'Never'}</td><td><div class="row-actions"><button class="btn btn-internet btn-sm" onclick="markInternetPaid('${c.id}')">${t('markPaid')}</button>${isOwner() ? `<button class="btn btn-danger btn-sm" onclick="deleteInternet('${c.id}')">${t('remove')}</button>` : ''}</div></td></tr>`;
+  }).join('')}</tbody>`;
+}
+
+function renderWater(){
+  const t2 = document.getElementById('table-water');
+  if(!state.water.length){ t2.innerHTML = `<tr><td><div class="empty"><b>No water customers yet</b>Add your first customer above.</div></td></tr>`; return; }
+  const planLabel = { weekly:'Weekly — unlimited', bucket5:'5-Bucket Pack', bucket10:'10-Bucket Pack' };
+  t2.innerHTML = `<thead><tr><th>Name</th><th>Phone</th><th>Plan</th><th>Buckets left</th><th>Last payment</th><th></th></tr></thead><tbody>${state.water.map(c=>`
+    <tr><td><b>${c.name}</b></td><td>${c.phone||'—'}</td><td>${planLabel[c.plan]||c.plan}</td><td>${c.plan==='weekly' ? '—' : `${c.bucket_remaining ?? 0} / ${c.bucket_total ?? 0}`}</td><td>${c.last_payment||'Never'}</td><td><div class="row-actions"><button class="btn btn-water btn-sm" onclick="logWaterPayment('${c.id}')">${c.plan==='weekly' ? t('logPayment') : t('buyNewPack')}</button>${c.plan!=='weekly' ? `<button class="btn btn-ghost btn-sm" onclick="logWaterPickup('${c.id}')">${t('logPickup')}</button>` : ''}${isOwner() ? `<button class="btn btn-danger btn-sm" onclick="deleteWater('${c.id}')">${t('remove')}</button>` : ''}</div></td></tr>`).join('')}</tbody>`;
+}
+
+function jobSizeSummary(j){
+  const items = Array.isArray(j.line_items) ? j.line_items : [];
+  if(!items.length) return '—';
+  const totalQty = items.reduce((a,li)=>a+(parseInt(li.qty)||0),0);
+  const totalArea = items.reduce((a,li)=>a+((parseFloat(li.width)||0)*(parseFloat(li.height)||0)/144*(parseInt(li.qty)||0)),0);
+  return `${totalQty} unit${totalQty===1?'':'s'} · ${fmt(totalArea)} sqft`;
+}
+
+function jobProductSummary(j){
+  const items = Array.isArray(j.line_items) ? j.line_items : [];
+  if(!items.length) return j.product_type || '—';
+  const counts = {};
+  items.forEach(li=>{
+    const type = li.productType || j.product_type || 'Item';
+    counts[type] = (counts[type]||0) + (parseInt(li.qty)||0);
+  });
+  return Object.entries(counts).map(([type,qty])=>`${qty}× ${type}`).join(', ');
+}
+
+function renderWindows(){
+  const t2 = document.getElementById('table-windows');
+  if(!state.windows.length){ t2.innerHTML = `<tr><td><div class="empty"><b>No window jobs yet</b>${canManageWindows() ? 'Add your first job above.' : ''}</div></td></tr>`; return; }
+  const badgeClass = { 'quoted':'badge-quoted','deposit paid':'badge-progress','in progress':'badge-progress','completed':'badge-completed','paid in full':'badge-paid' };
+  if(canManageWindows()){
+    t2.innerHTML = `<thead><tr><th>Customer</th><th>Product</th><th>Size</th><th>Final price</th><th>Received</th><th>Balance due</th><th>Costs total</th><th>Profit</th><th>Status</th><th></th></tr></thead><tbody>${state.windows.map(j=>{
+      const jc = j.currency || 'USD';
+      const totalCostNative = Number(j.material_cost||0)+Number(j.transport_cost||0)+Number(j.fabrication_cost||0)+Number(j.installation_cost||0)+Number(j.other_cost||0);
+      const profitNative = Number(j.final_price||0) - totalCostNative;
+      const balanceNative = Number(j.final_price||0) - Number(j.received||0);
+      return `<tr><td><b>${j.customer}</b><div style="color:var(--muted);font-size:11px;">${j.phone||''}</div><div style="color:var(--muted);font-size:10.5px;">${t('enteredBy')}: ${j.created_by_name||'—'}</div></td><td>${jobProductSummary(j)}${j.glass_type ? '<br><span style="color:var(--muted);font-size:11px;">Glass: '+j.glass_type+'</span>' : ''}${j.aluminum_color ? '<br><span style="color:var(--muted);font-size:11px;">Alum: '+j.aluminum_color+'</span>' : ''}</td><td>${jobSizeSummary(j)}</td><td>${disp(j.final_price,jc)}</td><td>${disp(j.received,jc)}</td><td class="${balanceNative>0?'profit-neg':'profit-pos'}">${disp(balanceNative,jc)}</td><td>${disp(totalCostNative,jc)}</td><td class="${profitNative>=0?'profit-pos':'profit-neg'}">${disp(profitNative,jc)}</td><td><span class="badge ${badgeClass[j.status]}" style="cursor:pointer;" onclick="cycleWindowStatus('${j.id}')" title="Click to advance status">${j.status}</span></td><td><div class="row-actions"><button class="btn btn-windows btn-sm" onclick="logWindowPayment('${j.id}')">${t('paymentInvoice')}</button><button class="btn btn-ghost btn-sm" onclick="startEditJob('${j.id}')">Edit job</button><button class="btn btn-ghost btn-sm" onclick="editWindowCosts('${j.id}')">${t('editCosts')}</button>${canDeleteWindowJobs() ? `<button class="btn btn-danger btn-sm" onclick="deleteWindow('${j.id}')">${t('remove')}</button>` : ''}</div></td></tr>`;
+    }).join('')}</tbody>`;
+  } else {
+    t2.innerHTML = `<thead><tr><th>Customer</th><th>Product</th><th>Size</th><th>Total</th><th>Paid</th><th>Balance due</th><th>Installation date</th><th>Status</th><th></th></tr></thead><tbody>${state.windows.map(j=>{
+      const jc = j.currency || 'HTG';
+      const balance = Number(j.final_price||0) - Number(j.received||0);
+      return `<tr><td><b>${j.customer}</b><div style="color:var(--muted);font-size:11px;">${j.phone||''}</div><div style="color:var(--muted);font-size:10.5px;">${t('enteredBy')}: ${j.created_by_name||'—'}</div></td><td>${jobProductSummary(j)}</td><td>${jobSizeSummary(j)}</td><td>${j.final_price!=null ? disp(j.final_price,jc) : '<span style="color:var(--muted);">not priced yet</span>'}</td><td>${disp(j.received,jc)}</td><td class="${balance>0?'profit-neg':'profit-pos'}">${j.final_price!=null ? disp(balance,jc) : '—'}</td><td>${j.due_date||'—'}</td><td><span class="badge ${badgeClass[j.status]}" style="cursor:pointer;" onclick="cycleWindowStatus('${j.id}')" title="Click to advance status">${j.status}</span></td><td><button class="btn btn-windows btn-sm" onclick="logWindowPayment('${j.id}')">${t('paymentInvoice')}</button></td></tr>`;
+    }).join('')}</tbody>`;
+  }
+}
+
+function renderCash(){
+  const t2 = document.getElementById('table-cash');
+  let entries = [...state.cashLog].sort((a,b)=>b.date.localeCompare(a.date));
+  if(cashFilter!=='all') entries = entries.filter(e=>e.division===cashFilter);
+  if(!entries.length){ t2.innerHTML = `<tr><td><div class="empty"><b>No transactions</b></div></td></tr>`; return; }
+  t2.innerHTML = `<thead><tr><th>Receipt #</th><th>Date</th><th>Division</th><th>Note</th><th>Recorded as</th><th>Amount</th><th></th></tr></thead><tbody>${entries.map(e=>{
+    const nativeCcy = e.currency || divisionCurrency(e.division);
+    const flaggedOpen = state.flags.some(fl=>fl.cash_log_id===e.id && fl.status==='open');
+    const actionBtn = canDeleteCash()
+      ? `<button class="btn btn-ghost btn-sm" onclick="deleteCash('${e.id}')">Delete</button>`
+      : `<button class="btn btn-ghost btn-sm" onclick="flagCashEntry('${e.id}')">${flaggedOpen ? '🚩 Flagged' : 'Flag for review'}</button>`;
+    return `<tr><td>${e.receipt_number||'—'}</td><td>${e.date}</td><td style="text-transform:capitalize;">${e.division}</td><td>${e.note}</td><td>${CURRENCY_SYMBOLS[nativeCcy]||''}${fmt(e.amount)} ${nativeCcy}</td><td class="${e.type==='income'?'amt-income':'amt-expense'}">${e.type==='income'?'+':'−'}${disp(e.amount, nativeCcy)}</td><td>${actionBtn}</td></tr>`;
+  }).join('')}</tbody>`;
+
+  if(isOwner()){
+    const flagsList = document.getElementById('flags-list');
+    const openFlags = state.flags.filter(fl=>fl.status==='open');
+    flagsList.innerHTML = openFlags.length ? openFlags.map(fl=>{
+      const entry = state.cashLog.find(e=>e.id===fl.cash_log_id);
+      return `<div class="activity-item" style="align-items:flex-start;">
+        <div>
+          <b>${entry ? entry.note : '(transaction no longer exists)'}</b>
+          ${entry ? `<div style="color:var(--muted);font-size:11px;">${entry.date} · ${entry.division} · ${CURRENCY_SYMBOLS[entry.currency]||''}${fmt(entry.amount)} ${entry.currency}</div>` : ''}
+          <div style="margin-top:4px;font-size:12.5px;">📝 ${fl.note}</div>
+        </div>
+        <div class="row-actions">
+          ${entry ? `<button class="btn btn-danger btn-sm" onclick="deleteCash('${entry.id}')">Delete transaction</button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="resolveFlag('${fl.id}')">Mark resolved</button>
+        </div>
+      </div>`;
+    }).join('') : '<div class="empty">Nothing flagged right now.</div>';
+  }
+}
+
+// ---------- BOOT ----------
+(async function(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(session) await afterLogin();
+})();
+</script>
+</body>
+</html>
